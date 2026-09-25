@@ -2,20 +2,18 @@ import streamlit as st
 import pandas as pd
 from Banco_clinica import criar_tabela, inserir_consulta, listar_consultas, excluir_consulta
 
-# Configuração da página
+
 st.set_page_config(
     page_title="Sistema de Agendamento de Consultas",
     layout="wide"
 )
 
-# Inicializa o banco de dados
+
 criar_tabela()
 
 st.title(" Sistema de Agendamento de Consultas Médicas")
 
-# ==============================================================================
-# 1. CADASTRO (CREATE)
-# ==============================================================================
+
 st.subheader(" Agendar Nova Consulta")
 
 with st.form("form_cadastro", clear_on_submit=True):
@@ -40,7 +38,7 @@ with st.form("form_cadastro", clear_on_submit=True):
     enviado = st.form_submit_button("Salvar Agendamento")
 
     if enviado:
-        # Validação: impede o envio de campos vazios ou valor zero
+       
         if paciente.strip() == "" or medico.strip() == "":
             st.error(" Preencha os campos obrigatórios (Paciente e Médico) antes de salvar.")
         elif valor_consulta <= 0:
@@ -58,9 +56,7 @@ with st.form("form_cadastro", clear_on_submit=True):
 
 st.divider()
 
-# ==============================================================================
-# 2. LEITURA, FILTROS E ANÁLISE (READ & ANALYTICS)
-# ==============================================================================
+
 st.subheader(" Painel de Análises e Consultas Agendadas")
 
 df = listar_consultas()
@@ -68,17 +64,17 @@ df = listar_consultas()
 if df.empty:
     st.info("Nenhuma consulta cadastrada ainda. Use o formulário acima para começar.")
 else:
-    # --- FILTROS INTERATIVOS ---
+  
     st.write("####  Filtros Interativos")
     col_f1, col_f2 = st.columns(2)
 
     with col_f1:
-        # Filtro 1: Selectbox para Especialidade
+      
         opcoes_especialidades = ["Todas"] + list(df["especialidade"].unique())
         especialidade_filtrada = st.selectbox("Filtrar por Especialidade:", opcoes_especialidades)
 
     with col_f2:
-        # Filtro 2: Slider para Faixa de Valor
+        
         valor_min = float(df["valor_consulta"].min())
         valor_max = float(df["valor_consulta"].max())
 
@@ -92,7 +88,6 @@ else:
             value=(valor_min, valor_max)
         )
 
-    # --- APLICAÇÃO DOS FILTROS ---
     df_filtrado = df.copy()
 
     if especialidade_filtrada != "Todas":
@@ -103,7 +98,7 @@ else:
         (df_filtrado["valor_consulta"] <= faixa_valor[1])
     ]
 
-    # --- MÉTRICAS CALCULADAS ---
+   
     st.write("####  Métricas")
     if not df_filtrado.empty:
         faturamento_total = df_filtrado["valor_consulta"].sum()
@@ -119,7 +114,7 @@ else:
     col2.metric("Valor Médio por Consulta", f"R$ {valor_medio:,.2f}")
     col3.metric("Total de Consultas", total_consultas)
 
-    # --- GRÁFICOS DINÂMICOS (GROUPBY) ---
+  
     st.write("####  Gráficos")
     if not df_filtrado.empty:
         grafico_especialidade, grafico_medico = st.columns(2)
@@ -136,15 +131,13 @@ else:
     else:
         st.warning("Nenhuma consulta encontrada para os filtros aplicados.")
 
-    # --- TABELA DE REGISTROS ---
+ 
     st.write("####  Lista de Consultas Cadastradas")
     st.dataframe(df_filtrado, use_container_width=True)
 
     st.divider()
 
-    # ==========================================================================
-    # 3. EXCLUSÃO (DELETE)
-    # ==========================================================================
+   
     st.subheader(" Cancelar / Excluir Consulta")
 
     with st.expander("Excluir uma consulta por ID"):
